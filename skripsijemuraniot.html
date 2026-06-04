@@ -23,14 +23,38 @@
         }
         .bg-cerah { background-color: #2ecc71; color: white; }
         .bg-hujan { background-color: #e74c3c; color: white; }
+        
+        /* Style Tambahan untuk Halaman Verifikasi */
+        .login-container {
+            max-width: 400px;
+            margin-top: 10%;
+        }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
+<div id="authLayer" class="container login-container">
+    <div class="card main-card p-4 text-center">
+        <div class="mb-3">
+            <span style="font-size: 3.5rem;">🔒</span>
+        </div>
+        <h4 class="fw-bold text-dark mb-2">Verifikasi Akses</h4>
+        <p class="text-muted small mb-4">Masukkan kode keamanan khusus untuk mengendalikan perangkat Jemuran IoT.</p>
+        
+        <div class="mb-3">
+            <input type="password" id="inputKode" class="form-control form-control-lg text-center fw-bold" placeholder="• • • • • •" style="letter-spacing: 5px;">
+            <div id="pesanError" class="text-danger small mt-2 d-none">❌ Kode keamanan salah, silakan coba lagi!</div>
+        </div>
+        
+        <button onclick="cekOtorisasi()" class="btn btn-primary w-100 fw-bold py-2 fs-5">Masuk</button>
+    </div>
+</div>
+
+<div id="dashboardLayer" class="container py-5 d-none">
     <div class="text-center mb-5">
         <h1 class="fw-bold text-primary">Dashboard Jemuran IoT</h1>
         <p class="text-muted">Pantau dan kendalikan jemuranmu dari mana saja di seluruh dunia!</p>
+        <button onclick="logoutSistem()" class="btn btn-sm btn-outline-danger fw-semibold px-3">Keluar</button>
     </div>
 
     <div class="row g-4">
@@ -123,6 +147,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // KODE KEAMANAN AKSES
+    const KODE_RAHASIA = "123456";
+
     // Konfigurasi Database Firebase Utama
     const firebaseConfig = {
         databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -131,67 +158,103 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Sinkronisasi Data Monitoring Real-Time
-    db.ref("monitoring").on("value", (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            document.getElementById("txtSuhu").innerText = data.suhu || 0;
-            document.getElementById("txtLembap").innerText = data.kelembapan || 0;
+    // Buat cek kode akses pintu masuk
+    function cekOtorisasi() {
+        const inputUser = document.getElementById("inputKode").value;
+        const errTxt = document.getElementById("pesanError");
+        
+        if (inputUser === KODE_RAHASIA) {
+            // Jika benar, sembunyikan halaman login, tampilkan dashboard jemuran
+            document.getElementById("authLayer").classList.add("d-none");
+            document.getElementById("dashboardLayer").classList.remove("d-none");
+            errTxt.classList.add("d-none");
             
-            // Logika Badge Cuaca
-            const bCuaca = document.getElementById("badgeCuaca");
-            bCuaca.innerText = data.kondisi_cuaca || "-";
-            bCuaca.className = (data.kondisi_cuaca === "HUJAN") ? "badge bg-danger fs-5" : "badge bg-success fs-5";
+            jalankanEngineFirebase();
+        } else {
+            // Jika salah, tampilkan peringatan
+            errTxt.classList.remove("d-none");
+            document.getElementById("inputKode").value = "";
+        }
+    }
 
-            // Logika Status Posisi Jemuran
-            const bJemuran = document.getElementById("badgeJemuran");
-            bJemuran.innerText = data.posisi_jemuran || "-";
-            bJemuran.className = (data.posisi_jemuran === "TERBUKA") ? "status-badge bg-cerah" : "status-badge bg-hujan";
+    // Biar bisa pencet enter buat masuk
+    document.getElementById("inputKode").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            cekOtorisasi();
+        }
+    });
 
-            // Logika Visibilitas Panel Kontrol berdasarkan Mode
-            document.getElementById("txtModeAktiv").innerText = data.mode || "-";
-            if(data.mode === "MANUAL") {
-                document.getElementById("panelManual").classList.remove("d-none");
-                document.getElementById("panelAutoInfo").classList.add("d-none");
-            } else {
-                document.getElementById("panelManual").classList.add("d-none");
-                document.getElementById("panelAutoInfo").classList.remove("d-none");
+    // Fungsi Keluar Dashboard
+    function logoutSistem() {
+        document.getElementById("inputKode").value = "";
+        document.getElementById("authLayer").classList.remove("d-none");
+        document.getElementById("dashboardLayer").classList.add("d-none");
+    }
+
+    // Dibungkus ke dalam fungsi agar koneksi database baru aktif setelah verifikasi lolos
+    function jalankanEngineFirebase() {
+        // 1. Sinkronisasi Data Monitoring Real-Time
+        db.ref("monitoring").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById("txtSuhu").innerText = data.suhu || 0;
+                document.getElementById("txtLembap").innerText = data.kelembapan || 0;
+                
+                // Logika Badge Cuaca
+                const bCuaca = document.getElementById("badgeCuaca");
+                bCuaca.innerText = data.kondisi_cuaca || "-";
+                bCuaca.className = (data.kondisi_cuaca === "HUJAN") ? "badge bg-danger fs-5" : "badge bg-success fs-5";
+
+                // Logika Status Posisi Jemuran
+                const bJemuran = document.getElementById("badgeJemuran");
+                bJemuran.innerText = data.posisi_jemuran || "-";
+                bJemuran.className = (data.posisi_jemuran === "TERBUKA") ? "status-badge bg-cerah" : "status-badge bg-hujan";
+
+                // Logika Visibilitas Panel Kontrol berdasarkan Mode
+                document.getElementById("txtModeAktiv").innerText = data.mode || "-";
+                if(data.mode === "MANUAL") {
+                    document.getElementById("panelManual").classList.remove("d-none");
+                    document.getElementById("panelAutoInfo").classList.add("d-none");
+                } else {
+                    document.getElementById("panelManual").classList.add("d-none");
+                    document.getElementById("panelAutoInfo").classList.remove("d-none");
+                }
             }
-        }
-    });
-
-    // 2. Sinkronisasi Tabel Riwayat Aktivitas (Terbatas 5 Data Terakhir)
-    db.ref("history").limitToLast(5).on("value", (snapshot) => {
-        const tbody = document.getElementById("tabelHistory");
-        tbody.innerHTML = "";
-        
-        let logs = [];
-        snapshot.forEach((childSnapshot) => {
-            logs.push(childSnapshot.val());
         });
-        
-        logs.reverse(); // Mengurutkan dari yang paling baru
 
-        if(logs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>`;
-            return;
-        }
+        // 2. Sinkronisasi Tabel Riwayat Aktivitas (Terbatas 5 Data Terakhir)
+        db.ref("history").limitToLast(5).on("value", (snapshot) => {
+            const tbody = document.getElementById("tabelHistory");
+            tbody.innerHTML = "";
+            
+            let logs = [];
+            snapshot.forEach((childSnapshot) => {
+                logs.push(childSnapshot.val());
+            });
+            
+            logs.reverse(); // Mengurutkan dari yang paling baru
 
-        logs.forEach(log => {
-            const badgeAksi = log.status_jemuran === "TERBUKA" ? 'badge bg-success' : 'badge bg-danger';
-            tbody.className = "text-center";
-            tbody.innerHTML += `
-                <tr>
-                    <td>${log.tanggal || '-'}</td>
-                    <td>${log.waktu || '-'}</td>
-                    <td><span class="${badgeAksi}">${log.status_jemuran || '-'}</span></td>
-                    <td><span class="badge bg-primary">${log.mode_sistem || '-'}</span></td>
-                    <td>${log.kondisi_cuaca || '-'}</td>
-                    <td>${log.suhu_celcius || 0}°C</td>
-                </tr>
-            `;
+            if(logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            logs.forEach(log => {
+                const badgeAksi = log.status_jemuran === "TERBUKA" ? 'badge bg-success' : 'badge bg-danger';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${log.tanggal || '-'}</td>
+                        <td>${log.waktu || '-'}</td>
+                        <td><span class="${badgeAksi}">${log.status_jemuran || '-'}</span></td>
+                        <td><span class="badge bg-primary">${log.mode_sistem || '-'}</span></td>
+                        <td>${log.kondisi_cuaca || '-'}</td>
+                        <td>${log.suhu_celcius || 0}°C</td>
+                    </tr>
+                `;
+            });
         });
-    });
+    }
 
     // 3. Fungsi Aksi Ganti Mode Sistem
     function ubahMode(modeBaru) {
