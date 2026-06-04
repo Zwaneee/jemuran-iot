@@ -57,7 +57,7 @@
             </svg>
         </div>
         <h4 class="fw-bold text-dark mb-2">Verifikasi Akses</h4>
-        <p class="text-muted small mb-4">Masukkan kode keamanan.</p>
+        <p class="text-muted small mb-4">Masukkan kode keamanan untuk mengendalikan perangkat Jemuran IoT.</p>
         
         <div class="mb-3">
             <input type="password" id="inputKode" class="form-control pin-input text-center fw-bold" placeholder="••••••">
@@ -142,3 +142,141 @@
                         <thead class="table-dark">
                             <tr class="text-center">
                                 <th>Tanggal</th>
+                                <th>Jam</th>
+                                <th>Aksi Jemuran</th>
+                                <th>Mode Sistem</th>
+                                <th>Cuaca</th>
+                                <th>Suhu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelHistory" class="text-center">
+                            <tr>
+                                <td colspan="6" class="text-muted py-3">Menghubungkan ke database cloud...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    // KODE KEAMANAN AKSES (Silakan ganti password di bawah ini, Bro!)
+    const KODE_RAHASIA = "123456";
+
+    // Konfigurasi Database Firebase Utama
+    const firebaseConfig = {
+        databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Fungsi cek otorisasi
+    function cekOtorisasi() {
+        const inputUser = document.getElementById("inputKode").value;
+        const errTxt = document.getElementById("pesanError");
+        
+        if (inputUser === KODE_RAHASIA) {
+            document.getElementById("authLayer").classList.add("d-none");
+            document.getElementById("dashboardLayer").classList.remove("d-none");
+            errTxt.classList.add("d-none");
+            
+            jalankanEngineFirebase();
+        } else {
+            errTxt.classList.remove("d-none");
+            document.getElementById("inputKode").value = "";
+        }
+    }
+
+    // Listener tombol enter
+    document.getElementById("inputKode").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            cekOtorisasi();
+        }
+    });
+
+    // Fungsi Logout
+    function logoutSistem() {
+        document.getElementById("inputKode").value = "";
+        document.getElementById("authLayer").classList.remove("d-none");
+        document.getElementById("dashboardLayer").classList.add("d-none");
+    }
+
+    // Sinkronisasi data Firebase
+    function jalankanEngineFirebase() {
+        // 1. Monitoring Real-Time
+        db.ref("monitoring").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById("txtSuhu").innerText = data.suhu || 0;
+                document.getElementById("txtLembap").innerText = data.kelembapan || 0;
+                
+                const bCuaca = document.getElementById("badgeCuaca");
+                bCuaca.innerText = data.kondisi_cuaca || "-";
+                bCuaca.className = (data.kondisi_cuaca === "HUJAN") ? "badge bg-danger fs-5" : "badge bg-success fs-5";
+
+                const bJemuran = document.getElementById("badgeJemuran");
+                bJemuran.innerText = data.posisi_jemuran || "-";
+                bJemuran.className = (data.posisi_jemuran === "TERBUKA") ? "status-badge bg-cerah" : "status-badge bg-hujan";
+
+                document.getElementById("txtModeAktiv").innerText = data.mode || "-";
+                if(data.mode === "MANUAL") {
+                    document.getElementById("panelManual").classList.remove("d-none");
+                    document.getElementById("panelAutoInfo").classList.add("d-none");
+                } else {
+                    document.getElementById("panelManual").classList.add("d-none");
+                    document.getElementById("panelAutoInfo").classList.remove("d-none");
+                }
+            }
+        });
+
+        // 2. History Tabel Logs
+        db.ref("history").limitToLast(5).on("value", (snapshot) => {
+            const tbody = document.getElementById("tabelHistory");
+            tbody.innerHTML = "";
+            
+            let logs = [];
+            snapshot.forEach((childSnapshot) => {
+                logs.push(childSnapshot.val());
+            });
+            
+            logs.reverse();
+
+            if(logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = "";
+            logs.forEach(log => {
+                const badgeAksi = log.status_jemuran === "TERBUKA" ? 'badge bg-success' : 'badge bg-danger';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${log.tanggal || '-'}</td>
+                        <td>${log.waktu || '-'}</td>
+                        <td><span class="${badgeAksi}">${log.status_jemuran || '-'}</span></td>
+                        <td><span class="badge bg-primary">${log.mode_sistem || '-'}</span></td>
+                        <td>${log.kondisi_cuaca || '-'}</td>
+                        <td>${log.suhu_celcius || 0}°C</td>
+                    </tr>
+                `;
+            });
+        });
+    }
+
+    function ubahMode(modeBaru) {
+        db.ref("monitoring").update({ mode: modeBaru });
+    }
+
+    function bukaTutupJemuran(aksiBaru) {
+        db.ref("monitoring").update({ posisi_jemuran: aksiBaru });
+    }
+</script>
+
+</body>
+</html>
