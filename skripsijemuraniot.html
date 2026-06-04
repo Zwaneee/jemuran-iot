@@ -7,13 +7,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f4f6f9;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .main-card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+            background-color: #ffffff;
         }
         .status-badge {
             font-size: 1.5rem;
@@ -24,29 +26,96 @@
         .bg-cerah { background-color: #2ecc71; color: white; }
         .bg-hujan { background-color: #e74c3c; color: white; }
         
-        /* Style Tambahan untuk Halaman Verifikasi */
-        .login-container {
-            max-width: 400px;
-            margin-top: 10%;
+        /* Halaman Verif */
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 40px 30px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(30, 50, 90, 0.1);
+            transition: all 0.3s ease;
+        }
+        .auth-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(30, 50, 90, 0.15);
+        }
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .pin-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 1.6rem;
+            letter-spacing: 8px;
+            text-indent: 8px;
+            transition: all 0.2s ease;
+            color: #2d3748;
+        }
+        .pin-input:focus {
+            background: #ffffff;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        }
+        .btn-verify {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn-verify:hover {
+            opacity: 0.95;
+            transform: translateY(1px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
         }
     </style>
 </head>
 <body>
 
-<div id="authLayer" class="container login-container">
-    <div class="card main-card p-4 text-center">
-        <div class="mb-3">
-            <span style="font-size: 3.5rem;">🔒</span>
+<div id="authLayer" class="auth-wrapper">
+    <div class="auth-card text-center">
+        <div class="icon-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-shield-lock-fill" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 .5c-.662 0-1.77.249-2.813.525a61 61 0 0 0-2.772.815 1.49 1.49 0 0 0-1.015 1.222c-.013.123-.042.316-.067.575-.028.286-.06.696-.073 1.196-.027 1.012.065 2.19.608 3.146C3.335 11.393 5.14 12.65 7.71 13.758a.5.5 0 0 0 .38 0c2.57-1.108 4.375-2.365 4.915-3.32.543-.956.635-2.134.607-3.146-.013-.5-.045-.91-.073-1.196-.025-.259-.054-.452-.067-.575a1.49 1.49 0 0 0-1.015-1.222 61 61 0 0 0-2.773-.815C9.77.749 8.663.5 8 .5m0 5a1.5 1.5 0 0 1 .5 2.915V10a.5.5 0 0 1-1 0V8.415A1.5 1.5 0 0 1 8 5.5"/>
+            </svg>
         </div>
-        <h4 class="fw-bold text-dark mb-2">Verifikasi Akses</h4>
-        <p class="text-muted small mb-4">Masukkan kode keamanan khusus untuk mengendalikan perangkat Jemuran IoT.</p>
+        <h4 class="fw-bold text-dark mb-2" style="letter-spacing: -0.5px;">Gateway Security</h4>
+        <p class="text-muted small px-2 mb-4">Sistem mendeteksi enkripsi terenkarnasi. Silakan masukkan kode otentikasi perangkat IoT Anda.</p>
         
-        <div class="mb-3">
-            <input type="password" id="inputKode" class="form-control form-control-lg text-center fw-bold" placeholder="• • • • • •" style="letter-spacing: 5px;">
-            <div id="pesanError" class="text-danger small mt-2 d-none">❌ Kode keamanan salah, silakan coba lagi!</div>
+        <div class="mb-4">
+            <input type="password" id="inputKode" class="form-control pin-input text-center fw-bold" placeholder="••••••">
+            <div id="pesanError" class="text-danger small mt-2 d-none fw-semibold">
+                <span class="me-1">⚠️</span> Kode keamanan tidak valid, silakan coba lagi.
+            </div>
         </div>
         
-        <button onclick="cekOtorisasi()" class="btn btn-primary w-100 fw-bold py-2 fs-5">Masuk</button>
+        <button onclick="cekOtorisasi()" class="btn btn-verify w-100">Masuk</button>
     </div>
 </div>
 
