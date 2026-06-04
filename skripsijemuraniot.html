@@ -7,15 +7,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            min-height: 100vh;
+            background-color: #f4f6f9;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .main-card {
             border: none;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .status-badge {
             font-size: 1.5rem;
@@ -27,95 +25,46 @@
         .bg-hujan { background-color: #e74c3c; color: white; }
         
         /* Halaman Verif */
-        .auth-wrapper {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .auth-card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 24px;
-            padding: 40px 30px;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 15px 35px rgba(30, 50, 90, 0.1);
-            transition: all 0.3s ease;
-        }
-        .auth-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(30, 50, 90, 0.15);
-        }
-        .icon-box {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        .login-container {
+            max-width: 400px;
+            margin-top: 12%;
         }
         .pin-input {
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 12px;
-            font-size: 1.6rem;
-            letter-spacing: 8px;
-            text-indent: 8px;
-            transition: all 0.2s ease;
-            color: #2d3748;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 1.4rem;
+            letter-spacing: 6px;
+            transition: border-color 0.2s;
         }
         .pin-input:focus {
-            background: #ffffff;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
-        .btn-verify {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 14px;
-            padding: 14px;
-            color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
-        }
-        .btn-verify:hover {
-            opacity: 0.95;
-            transform: translateY(1px);
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+        .btn-login {
+            border-radius: 10px;
+            padding: 12px;
         }
     </style>
 </head>
 <body>
 
-<div id="authLayer" class="auth-wrapper">
-    <div class="auth-card text-center">
-        <div class="icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" class="bi bi-shield-lock-fill" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M8 .5c-.662 0-1.77.249-2.813.525a61 61 0 0 0-2.772.815 1.49 1.49 0 0 0-1.015 1.222c-.013.123-.042.316-.067.575-.028.286-.06.696-.073 1.196-.027 1.012.065 2.19.608 3.146C3.335 11.393 5.14 12.65 7.71 13.758a.5.5 0 0 0 .38 0c2.57-1.108 4.375-2.365 4.915-3.32.543-.956.635-2.134.607-3.146-.013-.5-.045-.91-.073-1.196-.025-.259-.054-.452-.067-.575a1.49 1.49 0 0 0-1.015-1.222 61 61 0 0 0-2.773-.815C9.77.749 8.663.5 8 .5m0 5a1.5 1.5 0 0 1 .5 2.915V10a.5.5 0 0 1-1 0V8.415A1.5 1.5 0 0 1 8 5.5"/>
+<div id="authLayer" class="container login-container">
+    <div class="card main-card p-4 text-center">
+        <div class="mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="#0d6efd" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                <path d="M8 1a3 3 0 0 1 3 3v3H5V4a3 3 0 0 1 3-3m5 6V4a5 5 0 0 0-10 0v3H1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1"/>
             </svg>
         </div>
-        <h4 class="fw-bold text-dark mb-2" style="letter-spacing: -0.5px;">Gateway Security</h4>
-        <p class="text-muted small px-2 mb-4">Sistem mendeteksi enkripsi terenkarnasi. Silakan masukkan kode otentikasi perangkat IoT Anda.</p>
+        <h4 class="fw-bold text-dark mb-2">Verifikasi Akses</h4>
+        <p class="text-muted small mb-4">Masukkan kode keamanan.</p>
         
-        <div class="mb-4">
+        <div class="mb-3">
             <input type="password" id="inputKode" class="form-control pin-input text-center fw-bold" placeholder="••••••">
-            <div id="pesanError" class="text-danger small mt-2 d-none fw-semibold">
-                <span class="me-1">⚠️</span> Kode keamanan tidak valid, silakan coba lagi.
-            </div>
+            <div id="pesanError" class="text-danger small mt-2 d-none fw-semibold">❌ Kode keamanan salah, silakan coba lagi!</div>
         </div>
         
-        <button onclick="cekOtorisasi()" class="btn btn-verify w-100">Masuk</button>
+        <button onclick="cekOtorisasi()" class="btn btn-primary btn-login w-100 fw-bold fs-6">Masuk</button>
     </div>
 </div>
 
@@ -193,148 +142,3 @@
                         <thead class="table-dark">
                             <tr class="text-center">
                                 <th>Tanggal</th>
-                                <th>Jam</th>
-                                <th>Aksi Jemuran</th>
-                                <th>Mode Sistem</th>
-                                <th>Cuaca</th>
-                                <th>Suhu</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelHistory" class="text-center">
-                            <tr>
-                                <td colspan="6" class="text-muted py-3">Menghubungkan ke database cloud...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<script>
-    // KODE KEAMANAN AKSES
-    const KODE_RAHASIA = "123456";
-
-    // Konfigurasi Database Firebase Utama
-    const firebaseConfig = {
-        databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // Buat cek kode akses pintu masuk
-    function cekOtorisasi() {
-        const inputUser = document.getElementById("inputKode").value;
-        const errTxt = document.getElementById("pesanError");
-        
-        if (inputUser === KODE_RAHASIA) {
-            // Jika benar, sembunyikan halaman login, tampilkan dashboard jemuran
-            document.getElementById("authLayer").classList.add("d-none");
-            document.getElementById("dashboardLayer").classList.remove("d-none");
-            errTxt.classList.add("d-none");
-            
-            jalankanEngineFirebase();
-        } else {
-            // Jika salah, tampilkan peringatan
-            errTxt.classList.remove("d-none");
-            document.getElementById("inputKode").value = "";
-        }
-    }
-
-    // Biar bisa pencet enter buat masuk
-    document.getElementById("inputKode").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            cekOtorisasi();
-        }
-    });
-
-    // Fungsi Keluar Dashboard
-    function logoutSistem() {
-        document.getElementById("inputKode").value = "";
-        document.getElementById("authLayer").classList.remove("d-none");
-        document.getElementById("dashboardLayer").classList.add("d-none");
-    }
-
-    // Dibungkus ke dalam fungsi agar koneksi database baru aktif setelah verifikasi lolos
-    function jalankanEngineFirebase() {
-        // 1. Sinkronisasi Data Monitoring Real-Time
-        db.ref("monitoring").on("value", (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                document.getElementById("txtSuhu").innerText = data.suhu || 0;
-                document.getElementById("txtLembap").innerText = data.kelembapan || 0;
-                
-                // Logika Badge Cuaca
-                const bCuaca = document.getElementById("badgeCuaca");
-                bCuaca.innerText = data.kondisi_cuaca || "-";
-                bCuaca.className = (data.kondisi_cuaca === "HUJAN") ? "badge bg-danger fs-5" : "badge bg-success fs-5";
-
-                // Logika Status Posisi Jemuran
-                const bJemuran = document.getElementById("badgeJemuran");
-                bJemuran.innerText = data.posisi_jemuran || "-";
-                bJemuran.className = (data.posisi_jemuran === "TERBUKA") ? "status-badge bg-cerah" : "status-badge bg-hujan";
-
-                // Logika Visibilitas Panel Kontrol berdasarkan Mode
-                document.getElementById("txtModeAktiv").innerText = data.mode || "-";
-                if(data.mode === "MANUAL") {
-                    document.getElementById("panelManual").classList.remove("d-none");
-                    document.getElementById("panelAutoInfo").classList.add("d-none");
-                } else {
-                    document.getElementById("panelManual").classList.add("d-none");
-                    document.getElementById("panelAutoInfo").classList.remove("d-none");
-                }
-            }
-        });
-
-        // 2. Sinkronisasi Tabel Riwayat Aktivitas (Terbatas 5 Data Terakhir)
-        db.ref("history").limitToLast(5).on("value", (snapshot) => {
-            const tbody = document.getElementById("tabelHistory");
-            tbody.innerHTML = "";
-            
-            let logs = [];
-            snapshot.forEach((childSnapshot) => {
-                logs.push(childSnapshot.val());
-            });
-            
-            logs.reverse(); // Mengurutkan dari yang paling baru
-
-            if(logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = "";
-            logs.forEach(log => {
-                const badgeAksi = log.status_jemuran === "TERBUKA" ? 'badge bg-success' : 'badge bg-danger';
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${log.tanggal || '-'}</td>
-                        <td>${log.waktu || '-'}</td>
-                        <td><span class="${badgeAksi}">${log.status_jemuran || '-'}</span></td>
-                        <td><span class="badge bg-primary">${log.mode_sistem || '-'}</span></td>
-                        <td>${log.kondisi_cuaca || '-'}</td>
-                        <td>${log.suhu_celcius || 0}°C</td>
-                    </tr>
-                `;
-            });
-        });
-    }
-
-    // 3. Fungsi Aksi Ganti Mode Sistem
-    function ubahMode(modeBaru) {
-        db.ref("monitoring").update({ mode: modeBaru });
-    }
-
-    // 4. Fungsi Aksi Manual Buka/Tutup Atap
-    function bukaTutupJemuran(aksiBaru) {
-        db.ref("monitoring").update({ posisi_jemuran: aksiBaru });
-    }
-</script>
-
-</body>
-</html>
