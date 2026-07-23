@@ -183,9 +183,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // Konfigurasi Firebase (Tambahkan apiKey dari Firebase Console)
+    // Konfigurasi Firebase
     const firebaseConfig = {
-        apiKey: "AIzaSyD19_JyGzUSd0Tm3VLKMKPhLiYpUKTe5IQ",
+        apiKey: "AIzaSy...Isi-Dengan-API-Key-Web-Anda",
         authDomain: "jemuran-iot-ac346.firebaseapp.com",
         databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "jemuran-iot-ac346"
@@ -227,35 +227,41 @@
         auth.signOut();
     }
 
-    // --- SINKRONISASI DATA MONITORING & JADWAL ---
+    // --- SINKRONISASI DATA REALTIME MONITORING, HISTORY, & JADWAL ---
     function initListeners() {
-        // Monitoring Realtime
+        // 1. Monitoring Realtime (Sensors & Status)
         db.ref("monitoring").on("value", (snapshot) => {
             const data = snapshot.val();
-            if(data) {
-                document.getElementById("txtSuhu").innerText = data.suhu || 0;
-                document.getElementById("txtLembap").innerText = data.kelembapan || 0;
+            if (data) {
+                document.getElementById("txtSuhu").innerText = (data.suhu !== undefined) ? data.suhu : 0;
+                document.getElementById("txtLembap").innerText = (data.kelembapan !== undefined) ? data.kelembapan : 0;
                 
                 const bCuaca = document.getElementById("badgeCuaca");
-                bCuaca.innerText = data.kondisi_cuaca || "-";
-                bCuaca.className = (data.kondisi_cuaca === "HUJAN") ? "badge bg-danger fs-5" : "badge bg-success fs-5";
+                if (data.kondisi_cuaca) {
+                    bCuaca.innerText = data.kondisi_cuaca;
+                    bCuaca.className = (data.kondisi_cuaca === "HUJAN") ? "badge bg-danger fs-5" : "badge bg-success fs-5";
+                }
 
                 const bJemuran = document.getElementById("badgeJemuran");
-                bJemuran.innerText = data.posisi_jemuran || "-";
-                bJemuran.className = (data.posisi_jemuran === "TERBUKA") ? "status-badge bg-cerah" : "status-badge bg-hujan";
+                if (data.posisi_jemuran) {
+                    bJemuran.innerText = data.posisi_jemuran;
+                    bJemuran.className = (data.posisi_jemuran === "TERBUKA") ? "status-badge bg-cerah" : "status-badge bg-hujan";
+                }
 
-                document.getElementById("txtModeAktiv").innerText = data.mode || "-";
-                if(data.mode === "MANUAL") {
-                    document.getElementById("panelManual").classList.remove("d-none");
-                    document.getElementById("panelAutoInfo").classList.add("d-none");
-                } else {
-                    document.getElementById("panelManual").classList.add("d-none");
-                    document.getElementById("panelAutoInfo").classList.remove("d-none");
+                if (data.mode) {
+                    document.getElementById("txtModeAktiv").innerText = data.mode;
+                    if (data.mode === "MANUAL") {
+                        document.getElementById("panelManual").classList.remove("d-none");
+                        document.getElementById("panelAutoInfo").classList.add("d-none");
+                    } else {
+                        document.getElementById("panelManual").classList.add("d-none");
+                        document.getElementById("panelAutoInfo").classList.remove("d-none");
+                    }
                 }
             }
         });
 
-        // Riwayat Aktivitas
+        // 2. Tabel Riwayat Aktivitas
         db.ref("history").limitToLast(5).on("value", (snapshot) => {
             const tbody = document.getElementById("tabelHistory");
             tbody.innerHTML = "";
@@ -263,7 +269,7 @@
             snapshot.forEach((childSnapshot) => { logs.push(childSnapshot.val()); });
             logs.reverse();
 
-            if(logs.length === 0) {
+            if (logs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>`;
                 return;
             }
@@ -283,10 +289,10 @@
             });
         });
 
-        // Pengaturan Jadwal Realtime
+        // 3. Pengaturan Jadwal Realtime
         db.ref("jadwal").on("value", (snapshot) => {
             const data = snapshot.val();
-            if(data) {
+            if (data) {
                 document.getElementById("switchJadwal").checked = data.aktif || false;
                 document.getElementById("jamBuka").value = data.jam_buka || "06:00";
                 document.getElementById("jamTutup").value = data.jam_tutup || "18:00";
@@ -306,7 +312,7 @@
     function simpanJadwal() {
         const buka = document.getElementById("jamBuka").value;
         const tutup = document.getElementById("jamTutup").value;
-        if(buka && tutup) {
+        if (buka && tutup) {
             db.ref("jadwal").update({
                 jam_buka: buka,
                 jam_tutup: tutup
