@@ -23,59 +23,47 @@
         }
         .bg-cerah { background-color: #2ecc71; color: white; }
         .bg-hujan { background-color: #e74c3c; color: white; }
-        
-        /* Halaman Verif */
-        .login-container {
-            max-width: 400px;
-            margin-top: 12%;
-        }
-        .pin-input {
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 1.4rem;
-            letter-spacing: 6px;
-            transition: border-color 0.2s;
-        }
-        .pin-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-        .btn-login {
-            border-radius: 10px;
-            padding: 12px;
-        }
     </style>
 </head>
 <body>
 
-<div id="authLayer" class="container login-container">
-    <div class="card main-card p-4 text-center">
-        <div class="mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="#0d6efd" class="bi bi-lock-fill" viewBox="0 0 16 16">
-                <path d="M8 1a3 3 0 0 1 3 3v3H5V4a3 3 0 0 1 3-3m5 6V4a5 5 0 0 0-10 0v3H1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1"/>
-            </svg>
+<!-- MODAL LOGIN FIREBASE AUTH -->
+<div class="modal fade" id="modalLogin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 border-0 shadow">
+            <h3 class="fw-bold text-center text-primary mb-3">Login Dashboard</h3>
+            <p class="text-center text-muted small mb-4">Silakan masuk menggunakan akun Firebase Anda</p>
+            <div id="loginError" class="alert alert-danger d-none small"></div>
+            <form id="formLogin">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" id="loginEmail" class="form-control" required placeholder="nama@email.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input type="password" id="loginPass" class="form-control" required placeholder="******">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2">MASUK</button>
+            </form>
         </div>
-        <h4 class="fw-bold text-dark mb-2">Verifikasi Akses</h4>
-        <p class="text-muted small mb-4">Masukkan kode keamanan untuk mengendalikan perangkat Jemuran IoT.</p>
-        
-        <div class="mb-3">
-            <input type="password" id="inputKode" class="form-control pin-input text-center fw-bold" placeholder="••••••">
-            <div id="pesanError" class="text-danger small mt-2 d-none fw-semibold">❌ Kode keamanan salah, silakan coba lagi!</div>
-        </div>
-        
-        <button onclick="cekOtorisasi()" class="btn btn-primary btn-login w-100 fw-bold fs-6">Masuk</button>
     </div>
 </div>
 
-<div id="dashboardLayer" class="container py-5 d-none">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold text-primary">Dashboard Jemuran IoT</h1>
-        <p class="text-muted">Pantau dan kendalikan jemuranmu dari mana saja di seluruh dunia!</p>
-        <button onclick="logoutSistem()" class="btn btn-sm btn-outline-danger fw-semibold px-3">Keluar</button>
+<!-- KONTEN UTAMA DASHBOARD -->
+<div id="mainDashboard" class="container py-5 d-none">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold text-primary m-0">Smart Jemuran Dashboard</h1>
+            <p class="text-muted m-0">Pantau dan kendalikan jemuran Anda dari mana saja</p>
+        </div>
+        <div>
+            <span id="userEmail" class="me-3 fw-semibold text-secondary small"></span>
+            <button onclick="keluar()" class="btn btn-outline-danger btn-sm fw-bold">Logout</button>
+        </div>
     </div>
 
     <div class="row g-4">
+        <!-- MONITORING SENSOR -->
         <div class="col-md-6">
             <div class="card main-card p-4 h-100">
                 <h4 class="fw-bold mb-4 text-secondary">📊 Monitoring Sensor</h4>
@@ -102,18 +90,20 @@
             </div>
         </div>
 
+        <!-- KONTROL SISTEM & JADWAL -->
         <div class="col-md-6">
             <div class="card main-card p-4 h-100">
                 <h4 class="fw-bold mb-3 text-secondary">⚙️ Kontrol Sistem</h4>
                 
-                <div class="text-center my-3">
-                    <span class="text-muted d-block small mb-2">STATUS JEMURAN</span>
+                <div class="text-center my-2">
+                    <span class="text-muted d-block small mb-1">STATUS JEMURAN</span>
                     <span id="badgeJemuran" class="status-badge bg-secondary">-</span>
                 </div>
 
                 <hr>
 
-                <div class="mb-4">
+                <!-- PENGATURAN MODE -->
+                <div class="mb-3">
                     <label class="form-label fw-bold text-muted small">MODE SISTEM (Saat ini: <span id="txtModeAktiv" class="text-primary fw-bold">-</span>)</label>
                     <div class="d-flex gap-2">
                         <button onclick="ubahMode('AUTO')" class="btn btn-outline-primary w-50 fw-bold py-2">AUTOMATIS</button>
@@ -121,19 +111,44 @@
                     </div>
                 </div>
 
-                <div id="panelManual" class="d-none">
-                    <label class="form-label fw-bold text-muted small">KONTROL JEMURAN (MANUAL MODE)</label>
+                <!-- PANEL MANUAL -->
+                <div id="panelManual" class="d-none mb-3">
+                    <label class="form-label fw-bold text-muted small">KONTROL ATAP (MANUAL MODE)</label>
                     <div class="d-flex gap-2">
                         <button onclick="bukaTutupJemuran('TERBUKA')" class="btn btn-success w-50 fw-bold py-2">BUKA JEMURAN</button>
                         <button onclick="bukaTutupJemuran('TUTUP')" class="btn btn-danger w-50 fw-bold py-2">TUTUP JEMURAN</button>
                     </div>
                 </div>
-                <div id="panelAutoInfo" class="alert alert-info text-center small fw-semibold m-0">
-                    Mode Otomatis Aktif. Jemuran digerakkan otomatis oleh sensor hujan.
+
+                <div id="panelAutoInfo" class="alert alert-info text-center small fw-semibold mb-3">
+                    Mode Otomatis Aktif. Motor digerakkan otomatis oleh sensor hujan atau jadwal.
                 </div>
+
+                <hr>
+
+                <!-- FITUR JADWAL BUKA/TUTUP -->
+                <h5 class="fw-bold text-secondary mb-3">🕒 Pengaturan Jadwal Otomatis</h5>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="switchJadwal" onchange="toggleJadwal()">
+                    <label class="form-check-label fw-semibold" for="switchJadwal">Aktifkan Fitur Jadwal</label>
+                </div>
+                
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small text-muted">Jam Buka Jemuran</label>
+                        <input type="time" id="jamBuka" class="form-control">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-muted">Jam Tutup Jemuran</label>
+                        <input type="time" id="jamTutup" class="form-control">
+                    </div>
+                </div>
+                <button onclick="simpanJadwal()" class="btn btn-primary w-100 fw-bold btn-sm">Simpan Jadwal</button>
+
             </div>
         </div>
 
+        <!-- RIWAYAT AKTIVITAS -->
         <div class="col-12">
             <div class="card main-card p-4">
                 <h4 class="fw-bold mb-3 text-secondary">📜 5 Riwayat Aktivitas Terakhir</h4>
@@ -161,55 +176,60 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Firebase JS Library (v8) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // KODE KEAMANAN AKSES (Silakan ganti password di bawah ini, Bro!)
-    const KODE_RAHASIA = "123456";
-
-    // Konfigurasi Database Firebase Utama
+    // Konfigurasi Firebase (Tambahkan apiKey dari Firebase Console)
     const firebaseConfig = {
-        databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app"
+        apiKey: "AIzaSyD19_JyGzUSd0Tm3VLKMKPhLiYpUKTe5IQ",
+        authDomain: "jemuran-iot-ac346.firebaseapp.com",
+        databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "jemuran-iot-ac346"
     };
     
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.database();
+    const modalLogin = new bootstrap.Modal(document.getElementById('modalLogin'));
 
-    // Fungsi cek otorisasi
-    function cekOtorisasi() {
-        const inputUser = document.getElementById("inputKode").value;
-        const errTxt = document.getElementById("pesanError");
-        
-        if (inputUser === KODE_RAHASIA) {
-            document.getElementById("authLayer").classList.add("d-none");
-            document.getElementById("dashboardLayer").classList.remove("d-none");
-            errTxt.classList.add("d-none");
-            
-            jalankanEngineFirebase();
+    // --- LOGIKA AUTHENTICATION ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            modalLogin.hide();
+            document.getElementById('mainDashboard').classList.remove('d-none');
+            document.getElementById('userEmail').innerText = user.email;
+            initListeners();
         } else {
-            errTxt.classList.remove("d-none");
-            document.getElementById("inputKode").value = "";
-        }
-    }
-
-    // Listener tombol enter
-    document.getElementById("inputKode").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            cekOtorisasi();
+            document.getElementById('mainDashboard').classList.add('d-none');
+            modalLogin.show();
         }
     });
 
-    // Fungsi Logout
-    function logoutSistem() {
-        document.getElementById("inputKode").value = "";
-        document.getElementById("authLayer").classList.remove("d-none");
-        document.getElementById("dashboardLayer").classList.add("d-none");
+    document.getElementById('formLogin').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPass').value;
+        const errDiv = document.getElementById('loginError');
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => { errDiv.classList.add('d-none'); })
+            .catch((err) => {
+                errDiv.innerText = "Login gagal: " + err.message;
+                errDiv.classList.remove('d-none');
+            });
+    });
+
+    function keluar() {
+        auth.signOut();
     }
 
-    // Sinkronisasi data Firebase
-    function jalankanEngineFirebase() {
-        // 1. Monitoring Real-Time
+    // --- SINKRONISASI DATA MONITORING & JADWAL ---
+    function initListeners() {
+        // Monitoring Realtime
         db.ref("monitoring").on("value", (snapshot) => {
             const data = snapshot.val();
             if(data) {
@@ -235,24 +255,19 @@
             }
         });
 
-        // 2. History Tabel Logs
+        // Riwayat Aktivitas
         db.ref("history").limitToLast(5).on("value", (snapshot) => {
             const tbody = document.getElementById("tabelHistory");
             tbody.innerHTML = "";
-            
             let logs = [];
-            snapshot.forEach((childSnapshot) => {
-                logs.push(childSnapshot.val());
-            });
-            
+            snapshot.forEach((childSnapshot) => { logs.push(childSnapshot.val()); });
             logs.reverse();
 
             if(logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="6" class="text-muted py-3">Belum ada riwayat aktivitas alat.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = "";
             logs.forEach(log => {
                 const badgeAksi = log.status_jemuran === "TERBUKA" ? 'badge bg-success' : 'badge bg-danger';
                 tbody.innerHTML += `
@@ -267,16 +282,40 @@
                 `;
             });
         });
+
+        // Pengaturan Jadwal Realtime
+        db.ref("jadwal").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById("switchJadwal").checked = data.aktif || false;
+                document.getElementById("jamBuka").value = data.jam_buka || "06:00";
+                document.getElementById("jamTutup").value = data.jam_tutup || "18:00";
+            }
+        });
     }
 
-    function ubahMode(modeBaru) {
-        db.ref("monitoring").update({ mode: modeBaru });
+    // --- FUNGSI AKSI KONTROL ---
+    function ubahMode(modeBaru) { db.ref("monitoring").update({ mode: modeBaru }); }
+    function bukaTutupJemuran(aksiBaru) { db.ref("monitoring").update({ posisi_jemuran: aksiBaru }); }
+
+    function toggleJadwal() {
+        const status = document.getElementById("switchJadwal").checked;
+        db.ref("jadwal").update({ aktif: status });
     }
 
-    function bukaTutupJemuran(aksiBaru) {
-        db.ref("monitoring").update({ posisi_jemuran: aksiBaru });
+    function simpanJadwal() {
+        const buka = document.getElementById("jamBuka").value;
+        const tutup = document.getElementById("jamTutup").value;
+        if(buka && tutup) {
+            db.ref("jadwal").update({
+                jam_buka: buka,
+                jam_tutup: tutup
+            });
+            alert("Jadwal berhasil disimpan!");
+        } else {
+            alert("Harap isi jam buka dan jam tutup!");
+        }
     }
 </script>
-
 </body>
 </html>
