@@ -33,7 +33,10 @@
         <div class="modal-content p-4 border-0 shadow">
             <h3 class="fw-bold text-center text-primary mb-3">Login Dashboard</h3>
             <p class="text-center text-muted small mb-4">Silakan masuk menggunakan akun Firebase Anda</p>
-            <div id="loginError" class="alert alert-danger d-none small"></div>
+            
+            <!-- Notifikasi Error Login -->
+            <div id="loginError" class="alert alert-danger d-none small fw-semibold" role="alert"></div>
+            
             <form id="formLogin">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Email</label>
@@ -215,10 +218,27 @@
         const pass = document.getElementById('loginPass').value;
         const errDiv = document.getElementById('loginError');
 
+        // Reset tampilan alert error saat submit
+        errDiv.classList.add('d-none');
+
         auth.signInWithEmailAndPassword(email, pass)
-            .then(() => { errDiv.classList.add('d-none'); })
+            .then(() => { 
+                errDiv.classList.add('d-none'); 
+            })
             .catch((err) => {
-                errDiv.innerText = "Login gagal: " + err.message;
+                // Konversi error code Firebase ke pesan bahasa Indonesia
+                let pesanError = "Login gagal! Silakan periksa kembali email dan password Anda.";
+                
+                if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+                    pesanError = "Email atau Password yang Anda masukkan salah!";
+                } else if (err.code === 'auth/invalid-email') {
+                    pesanError = "Format email tidak valid!";
+                } else if (err.code === 'auth/too-many-requests') {
+                    pesanError = "Terlalu banyak percobaan gagal. Silakan coba lagi nanti.";
+                }
+
+                // Tampilkan alert merah
+                errDiv.innerText = pesanError;
                 errDiv.classList.remove('d-none');
             });
     });
