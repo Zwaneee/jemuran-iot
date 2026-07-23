@@ -33,10 +33,7 @@
         <div class="modal-content p-4 border-0 shadow">
             <h3 class="fw-bold text-center text-primary mb-3">Login Dashboard</h3>
             <p class="text-center text-muted small mb-4">Silakan masuk menggunakan akun Firebase Anda</p>
-            
-            <!-- Notifikasi Error Login -->
-            <div id="loginError" class="alert alert-danger d-none small fw-semibold" role="alert"></div>
-            
+            <div id="loginError" class="alert alert-danger d-none small"></div>
             <form id="formLogin">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Email</label>
@@ -188,68 +185,48 @@
 <script>
     // Konfigurasi Firebase
     const firebaseConfig = {
-        apiKey: "AIzaSyD19_JyGzUSd0Tm3VLKMKPhLiYpUKTe5IQ", 
+        apiKey: "AIzaSyD19_JyGzUSd0Tm3VLKMKPhLiYpUKTe5IQ",
         authDomain: "jemuran-iot-ac346.firebaseapp.com",
         databaseURL: "https://jemuran-iot-ac346-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "jemuran-iot-ac346"
     };
     
-    // Inisialisasi Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
-    let modalLogin = null;
+    const modalLogin = new bootstrap.Modal(document.getElementById('modalLogin'));
 
-    document.addEventListener("DOMContentLoaded", () => {
-        modalLogin = new bootstrap.Modal(document.getElementById('modalLogin'));
+    // --- LOGIKA AUTHENTICATION ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            modalLogin.hide();
+            document.getElementById('mainDashboard').classList.remove('d-none');
+            document.getElementById('userEmail').innerText = user.email;
+            initListeners();
+        } else {
+            document.getElementById('mainDashboard').classList.add('d-none');
+            modalLogin.show();
+        }
+    });
 
-        // --- LOGIKA AUTHENTICATION ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                if (modalLogin) modalLogin.hide();
-                document.getElementById('mainDashboard').classList.remove('d-none');
-                document.getElementById('userEmail').innerText = user.email;
-                initListeners();
-            } else {
-                document.getElementById('mainDashboard').classList.add('d-none');
-                if (modalLogin) modalLogin.show();
-            }
-        });
+    document.getElementById('formLogin').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPass').value;
+        const errDiv = document.getElementById('loginError');
 
-        // Form Submit Handler
-        document.getElementById('formLogin').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPass').value;
-            const errDiv = document.getElementById('loginError');
+        // Sembunyikan alert dulu saat submit ulang
+        errDiv.classList.add('d-none');
 
-            errDiv.classList.add('d-none');
-
-            auth.signInWithEmailAndPassword(email, pass)
-                .then(() => { 
-                    errDiv.classList.add('d-none'); 
-                })
-                .catch((err) => {
-                    console.error("Firebase Login Error:", err);
-                    let pesanError = "Login gagal! Silakan periksa kembali email dan password Anda.";
-                    
-                    if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-                        pesanError = "Email atau Password yang Anda masukkan salah!";
-                    } else if (err.code === 'auth/invalid-email') {
-                        pesanError = "Format email tidak valid!";
-                    } else if (err.code === 'auth/too-many-requests') {
-                        pesanError = "Terlalu banyak percobaan gagal. Silakan coba lagi nanti.";
-                    } else if (err.code === 'auth/api-key-not-valid') {
-                        pesanError = "API Key Firebase tidak valid!";
-                    }
-
-                    errDiv.innerText = pesanError;
-                    errDiv.classList.remove('d-none');
-                });
-        });
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => { 
+                errDiv.classList.add('d-none'); 
+            })
+            .catch((err) => {
+                // Sederhana: Tampilkan teks gagal + deskripsi dari Firebase dan buka alert-nya
+                errDiv.innerText = "Login gagal: Email atau Password salah!";
+                errDiv.classList.remove('d-none');
+            });
     });
 
     function keluar() {
@@ -258,7 +235,7 @@
 
     // --- SINKRONISASI DATA REALTIME MONITORING, HISTORY, & JADWAL ---
     function initListeners() {
-        // 1. Monitoring Realtime
+        // 1. Monitoring Realtime (Sensors & Status)
         db.ref("monitoring").on("value", (snapshot) => {
             const data = snapshot.val();
             if (data) {
